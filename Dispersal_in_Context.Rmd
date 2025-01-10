@@ -7,7 +7,7 @@ output:
   html_document 
 ---
 
-```{r}
+```{r, eval=F}
 library(devtools)
 devtools::install_github("dd-harp/ramp.micro")
 ```
