@@ -1,0 +1,15 @@
+---
+title: "Figure 2"
+subtitle: "Mosquito Dispersal in Context"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+author: Héctor M. Sánchez C., Sean L. Wu, John M. Henry, John M. Marshall, David L. Smith
+output:
+  html_document 
+---
+
+
+```{r}
+library(ramp.micro)
+```
+
+The models are set up on `Models.Rmd` 

@@ -1,0 +1,19 @@
+---
+title: "Mosquito Dispersal in Context"
+subtitle: "Figures"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+author: Héctor M. Sánchez C., Sean L. Wu, John M. Henry, John M. Marshall, David L. Smith
+output:
+  html_document 
+---
+
+```{r}
+library(devtools)
+devtools::install_github("dd-harp/ramp.micro")
+```
+
+Then load `ramp.micro`
+
+```{r}
+library(ramp.micro)
+```

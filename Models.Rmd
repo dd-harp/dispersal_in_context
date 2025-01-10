@@ -1,0 +1,74 @@
+---
+title: "Models"
+subtitle: "Mosquito Dispersal in Context"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+author: Héctor M. Sánchez C., Sean L. Wu, John M. Henry, John M. Marshall, David L. Smith
+output:
+  html_document 
+---
+
+# {.tabset}
+
+## $\odot$
+
+```{r, eval=F}
+library(devtools)
+devtools::install_github("dd-harp/ramp.micro")
+```
+
+```{r}
+library(ramp.micro)
+```
+
+## Model 1 {.tabset}
+
+### Kernels
+
+```{r}
+kFb = make_kF_exp(k=2, s=1, gamma=1.5)
+kFq = make_kF_exp(k=2, s=2, gamma=2)
+```
+
+```{r}
+dd = seq(0, 5, by = 0.01)
+plot(dd, kFb(dd), type = "l", col = "darkred", xlab = "Distance", ylab = "Weight")
+lines(dd, kFq(dd), type = "l", col = "darkblue")
+```
+
+### Point Sets 
+
+```{r}
+set.seed(24328)
+bb = cbind(runif(256, -17, 17), runif(256, -17, 17))
+qq = cbind(runif(289, -17, 17), runif(289, -17, 17))
+```
+
+```{r, fig.height=5, fig.width=5}
+par(mar = c(1,1,1,1))
+plot_points_bq(bb, qq)
+```
+
+```{r}
+opts_d = list(kFb = kFb, kFq = kFq)
+mod1 = setup_model(bb, qq, dispersal_opts=opts_d)
+```
+
+### Psi 
+
+```{r}
+Psi_bb = make_Psi_xx(bb, kFb)
+Psi_qb = make_Psi_xy(bb, qq, kFq)
+Psi_bq = make_Psi_xy(qq, bb, kFb)
+Psi_qq = make_Psi_xx(qq, kFq)
+```
+
+```{r, fig.height=7, fig.width=7}
+par(mfcol = c(2,2), mar = c(1,2,1,2))
+plot_Psi_BQ(bb, qq, Psi_bb, Psi_qb, Psi_bq, Psi_qq)
+```
+### Save 
+
+```{r}
+save(mod1, file = "mod1.rda")
+```
+
