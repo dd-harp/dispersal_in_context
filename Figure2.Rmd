@@ -12,4 +12,27 @@ output:
 library(ramp.micro)
 ```
 
-The models are set up on `Models.Rmd` 
+The models are set up on `Models.Rmd.` Figure 2 uses **Model 1** 
+
+```{r}
+load("mod1.rda")
+```
+
+
+```{r, fig.height=4.5, fig.width=4}
+plot_Kbq(mod1)
+```
+
+```{r, fig.height=4.5, fig.width=4}
+plot_Kqb(mod1)
+```
+
+```{r, fig.height=4, fig.width=8}
+par(mfrow = c(1,2), mar = c(1,1,1,1))
+plot_Kbq(mod1)
+plot_Kqb(mod1)
+```
+
+```{r}
+plot_Kbq(mod1)
+```
