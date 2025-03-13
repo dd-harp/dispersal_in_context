@@ -1,0 +1,163 @@
+---
+title: "Figures for Dispersal in Context"
+subtitle: "BQS Model"
+output: html_document
+---
+
+# {.tabset}
+
+```{r}
+library(ramp.micro)
+makeFig = FALSE 
+```
+
+
+
+## Defining the Model
+
+```{r}
+kFb = make_kF_exp(k=2, s=1, gamma=1.5)
+kFq = make_kF_exp(k=2, s=2, gamma=2)
+kFs = make_kF_exp(k=1, s=.5, gamma=3)
+```
+
+```{r}
+dd <- seq(0, 4, by=0.05)
+plot(dd, kFb(dd), type = "l", col = "darkred")
+lines(dd, kFq(dd), type = "l", col = "darkblue")
+lines(dd, kFs(dd), type = "l", col = "darkgreen")
+```
+
+
+```{r}
+set.seed(24328)
+bb = cbind(runif(256, -17, 17), runif(256, -17, 17))
+qq = cbind(runif(289, -17, 17), runif(289, -17, 17))
+ss = cbind(runif(225, -17, 17), runif(225, -17, 17))
+disp_opts = list(kFb=kFb, kFq=kFq, kFs=kFs, stayB=0.5, stayQ=0.5)
+```
+
+
+```{r}
+mod2 = setup_model(bb, qq, ss, Mname = "BQS", dispersal_opts=disp_opts)
+```
+
+## Psi
+
+
+
+```{r, fig.height=11, fig.width=11}
+par(mfrow = c(3,3))
+plot_all_Psi(mod2, r=0.5, cx_D = 2, cx_S=0.3)
+```
+
+
+```{r, eval=F}
+mod2 <- compute_Kbq(mod2)
+dim(mod2$KGV$Kbq)
+```
+
+```{r, fig.height=5, fig.width=5, eval=F}
+par(mar = c(1,1,2,2))
+plot_Kbq(mod2)
+```
+
+
+```{r, eval=F}
+mod2 <- compute_Kqb(mod2)
+sum(mod2$KGV$Kqb)
+```
+
+```{r, fig.height=5, fig.width=5, eval=F}
+par(mar = c(1,1,2,2))
+plot_Kqb(mod2)
+```
+
+
+```{r}
+mod2 <- basic_analysis(mod2)
+```
+
+## BQ Figure 
+
+```{r,eval=F, echo=F}
+#devtools::load_all("../ramp.micro")
+```
+
+```{r, fig.height=7, fig.width=7}
+if(makeFig == TRUE) png("BQS.png", width=480, height=480)
+par(mar = c(1,1,3,3)) 
+psz = 4 
+Beq = mod2$steady$M$B
+Qeq = mod2$steady$M$Q
+Seq = mod2$steady$M$S
+plot_points(mod2, wts_b=Beq, wts_q=Qeq, wts_s=Seq, cx_b=psz, cx_q=psz, cx_s=psz)
+outline_points_b(mod2$b, wts_b=Beq, cx_b=psz)
+outline_points_q(mod2$q, wts_q=Qeq, cx_q=psz)
+outline_points_s(mod2$s, wts_s=Seq, cx_s=psz)
+mtext("b) BQS Steady States", 3, 1, cex=1.5)
+if(makeFig == TRUE) dev.off(dev.cur()) 
+```
+
+## Kxy Figure 
+
+
+
+
+```{r, fig.height=5, fig.width = 10}
+if(makeFig == TRUE) png("Kxy.png", width=1440, height=720)
+par(mfrow = c(1,2), mar = c(1,1,2,2))
+plot_Kqb(mod2, r=0.6, cx_q=3, cx_b=0.3, lwd=4, arw_lng=0.05)
+outline_points_q(mod2$q, wts=rowSums(mod2$KGV$Kqb), cx_q=psz, clr="darkblue")
+plot_Kbq(mod2, r=0.6, cx_b=3, cx_q=0.3, lwd=4, arw_lng=0.05)
+outline_points_b(mod2$b, wts=rowSums(mod2$KGV$Kbq), cx_b=psz, clr = "purple4")
+if(makeFig == TRUE) dev.off(dev.cur())
+```
+
+## Kxx Figure 
+
+```{r, fig.height=5, fig.width = 10}
+if(makeFig == TRUE) png("Kxx.png", width=1152, height=576)
+par(mfrow = c(1,2), mar = c(1,1,3,3))
+psz=4
+plot_Kqq(mod2, r=0.6, lwd=4, arw_lng=0.05, min_edge_frac = 0.01, cx_q=psz, cx_b = 0.5)
+outline_points_q(mod2$q, wts=rowSums(mod2$KGV$Kqq), cx_q=psz, clr="darkblue")
+plot_Kbb(mod2, r=0.6, lwd=4, arw_lng=0.05, min_edge_frac = 0.01, cx_b=psz, cx_q = 0.5)
+outline_points_b(mod2$b, wts=rowSums(mod2$KGV$Kbb), cx_b=psz, clr = "purple4")
+if(makeFig == TRUE) dev.off(dev.cur())
+```
+
+## GV Figure 
+
+```{r, fig.height=5, fig.width = 10}
+par(mfrow = c(1,2), mar = c(1,1,2,2))
+plot_dispersal_V(mod2, r=0.7, min_edge_frac = 0.01)
+plot_dispersal_G(mod2, r=0.7, min_edge_frac = 0.01)
+```
+
+```{r, fig.height=5, fig.width = 10}
+if(makeFig == TRUE) png("GV.png", width=1152, height=576)
+par(mfrow = c(1,2), mar = c(1,1,3,3))
+plot_dispersal_GG(mod2, r=0.7, cx_q =4, lwd=3, arw_lng = 0.1)
+outline_points_q(mod2$q, wts=rowSums(mod2$KGV$GG), cx_q=4, clr="darkblue")
+plot_dispersal_VV(mod2, r=0.7, cx_b=4, lwd=3, arw_lng=0.1)
+outline_points_b(mod2$b, wts=rowSums(mod2$KGV$VC), cx_b=4, clr = "purple4")
+if(makeFig == TRUE) dev.off(dev.cur())
+```
+
+## Figure 5
+
+To Do: 
+
++ 
+```{r, fig.height=4, fig.width=8, eval=F}
+par(mfrow=c(1,2))
+plot_meta(mod2, 4)
+plot_meta(mod2, 6)
+```
+
+
+```{r}
+save(mod2, file = "mod2.rda")
+```
+gg

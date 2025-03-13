@@ -22,7 +22,7 @@ Then load `ramp.micro`
 
 ```{r}
 library(ramp.micro)
-devtools::load_all("../ramp.micro")
+#devtools::load_all("../ramp.micro")
 ```
 
 ## Model 1 - BQ {.tabset}
@@ -54,8 +54,7 @@ plot_points_bq(bb, qq)
 ```
 
 ```{r}
-opts_d = list(kFb = kFb, kFq = kFq)
-mod1 = setup_model(bb, qq, dispersal_opts=opts_d)
+mod1 = setup_model(bb, qq, kFb = kFb, kFq = kFq)
 ```
 
 ### Psi 
@@ -86,21 +85,22 @@ mod1 <- make_Kqq(mod1)
 ```
 
 ```{r, fig.height=7, fig.width=7}
-par(mar = c(2,2,1,1))
+par(mar = c(2,2,2,2))
 plot_Kbq(mod1)
 ```
+
 ```{r, fig.height=7, fig.width=7}
-par(mar = c(2,2,1,1))
+par(mar = c(2,2,2,2))
 plot_Kqb(mod1)
 ```
 
 ```{r, fig.height=7, fig.width=7}
-par(mar = c(2,2,1,1))
+par(mar = c(2,2,2,2))
 plot_Kbb(mod1)
 ```
 
 ```{r, fig.height=7, fig.width=7}
-par(mar = c(2,2,1,1))
+par(mar = c(2,2,2,2))
 plot_Kqq(mod1)
 ```
 

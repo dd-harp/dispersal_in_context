@@ -1,0 +1,321 @@
+---
+title: "Figures for Dispersal in Context"
+subtitle: "BQ Model"
+output: html_document
+---
+
+# {.tabset}
+
+```{r}
+library(ramp.micro)
+makeFig = FALSE 
+```
+
+```{r}
+devtools::load_all("../ramp.micro")
+```
+
+
+## Defining the Model
+
+```{r}
+kFb = make_kF_exp(k=2, s=1, gamma=1.5)
+kFq = make_kF_exp(k=2, s=2, gamma=2)
+```
+
+```{r}
+dd <- seq(0, 4, by=0.05)
+plot(dd, kFb(dd), type = "l", col = "darkred")
+lines(dd, kFq(dd), type = "l", col = "darkblue")
+```
+
+
+```{r}
+set.seed(24328)
+bb = cbind(runif(256, -17, 17), runif(256, -17, 17))
+qq = cbind(runif(289, -17, 17), runif(289, -17, 17))
+disp_opts = list(kFb=kFb, kFq=kFq, stayB=0.5, stayQ=0.5)
+```
+
+
+```{r}
+mod1 = setup_model(bb, qq, dispersal_opts=disp_opts)
+```
+
+## Psi
+
+
+
+```{r, fig.height=9, fig.width=9}
+par(mfrow = c(2,2))
+plot_all_Psi(mod1, r=0.5, cx_D = 2, cx_S=0.3)
+```
+
+
+
+```{r, eval=F, echo=F}
+mod1 <- compute_Kbq(mod1)
+```
+
+```{r, eval=F, echo=F}
+mod1 <- compute_Kqb(mod1)
+```
+
+```{r}
+mod1 <- basic_analysis(mod1)
+```
+
+## BQ Figure 
+```{r}
+plotBQ = function(model, psz = 4){
+  Beq = model$steady$M$B
+  Qeq = model$steady$M$Q
+  plot_points(model, wts_b=Beq, wts_q=Qeq, cx_b=psz, cx_q=psz)
+  outline_points_b(model$b, wts_b=Beq, cx_b=psz)
+  outline_points_q(model$q, wts_q=Qeq, cx_q=psz)
+}
+```
+
+```{r, fig.height=5, fig.width=5}
+par(mar = c(1, 1, 3, 3))
+plotBQ(mod1, 4)
+mtext("a) BQ Steady State", 3, 1, cex=1.5)
+```
+
+```{r}
+png("BQ.png", width=480, height=480)
+par(mar = c(1, 1, 3, 3))
+plotBQ(mod1, 4)
+mtext("a) BQ Steady State", 3, 1, cex=1.5)
+```
+
+## Kxy Figure 
+
+```{r}
+figureKqb = function(model, psz=6){
+  plot_Kqb(model, r=0.8, cx_q=psz, cx_b=0.4, lwd=40, arw_lng=0.05)
+  outline_points_q(model$q, wts=rowSums(model$KGV$Kqb), cx_q=psz, clr="darkblue")
+}
+```
+
+```{r}
+figureKbq = function(model, psz=6){
+  plot_Kbq(model, r=0.8, cx_b=psz, cx_q=0.4, lwd=40, arw_lng=0.05)
+  outline_points_b(model$b, wts=rowSums(model$KGV$Kbq), cx_b=psz, clr = "purple4")  
+}
+```
+
+
+```{r, fig.height=5, fig.width = 10}
+par(mfrow = c(1,2), mar = c(1,1,3,3))
+figureKqb(mod1,3)
+mtext(expression(K[q%<-%b]), 3, 1, cex=1.5)
+figureKbq(mod1,3)
+mtext(expression(K[b%<-%q]), 3, 1, cex=1.5)
+```
+
+```{r}
+png("Kxy.png", width=960, height=480)
+par(mfrow = c(1,2), mar = c(1,1,3,3))
+figureKqb(mod1,4)
+mtext(expression(K[q%<-%b]), 3, .5, cex=1.5)
+figureKbq(mod1,4)
+mtext(expression(K[b%<-%q]), 3, .5, cex=1.5)
+dev.off(dev.cur())
+```
+
+
+## Kxx Figure 
+
+```{r}
+figureKqq = function(model, psz=6){
+  plot_Kqq(model, r=0.8, lwd=40, arw_lng=0.05, min_edge_frac = 0.01, cx_q=psz, cx_b = 0.5)
+  outline_points_q(model$q, wts=rowSums(model$KGV$Kqq), cx_q=psz, clr="darkblue")
+}
+```
+
+```{r}
+figureKbb = function(model, psz=6){
+  plot_Kbb(model, r=0.8, lwd=40, arw_lng=0.05, min_edge_frac = 0.01, cx_b=psz, cx_q = 0.5)
+  outline_points_b(model$b, wts=rowSums(model$KGV$Kbb), cx_b=psz, clr = "purple4")
+}
+```
+
+
+```{r, fig.height=5, fig.width = 10}
+par(mfrow = c(1,2), mar = c(1,1,3,3))
+figureKqq(mod1, 3)
+mtext(expression(K[q%<-%q]), 3, 1, cex=1.5)
+figureKbb(mod1, 3)
+mtext(expression(K[b%<-%b]), 3, 1, cex=1.5)
+```
+```{r, fig.height=5, fig.width = 10}
+png("Kxx.png", width=960, height=480)
+par(mfrow = c(1,2), mar = c(1,1,3,3))
+figureKqq(mod1, 4)
+mtext(expression(K[q%<-%q]), 3, 1, cex=1.5)
+figureKbb(mod1, 4)
+mtext(expression(K[b%<-%b]), 3, 1, cex=1.5)
+dev.off(dev.cur())
+```
+
+## GV Figure 
+
+```{r}
+devtools::load_all("../ramp.micro")
+```
+
+```{r, fig.height=5, fig.width = 10}
+par(mfrow = c(1,2), mar = c(1,1,2,2))
+plot_dispersal_V(mod1, r=0.7, min_edge_frac = 0.01)
+plot_dispersal_G(mod1, r=0.7, min_edge_frac = 0.01)
+```
+
+```{r}
+figureGG = function(model, psz=4){
+  plot_dispersal_GG(model, r=0.7, cx_q=psz, lwd=3, arw_lng = 0.1)
+  outline_points_q(model$q, wts=rowSums(model$KGV$GG), cx_q=4, clr="darkblue")
+}
+```
+
+```{r}
+figureVC = function(model, psz=4){
+  plot_dispersal_VV(model, r=0.7, cx_b=4, lwd=3, arw_lng=0.1)
+  outline_points_b(model$b, wts=rowSums(model$KGV$VC), cx_b=4, clr = "purple4")
+}
+```
+
+
+```{r, fig.height=5, fig.width = 10}
+par(mfrow = c(1,2), mar = c(1,1,3,3))
+figureGG(mod1, 4)
+figureVC(mod1, 4)
+```
+
+```{r}
+png("GV.png", width=960, height=480)
+par(mfrow = c(1,2), mar = c(1,1,3,3))
+figureGG(mod1, 4)
+figureVC(mod1, 4)
+dev.off(dev.cur())
+```
+
+## Figure 5
+
+To Do: 
+
+```{r}
+devtools::load_all("../ramp.micro")
+```
+
+```{r}
+subgraphGG = function(model){
+  plot_subgraph(model, model$graphs$GG_net, stretch=0.1, min_edge_frac=0.1)
+}
+```
+
+```{r}
+subgraphVC = function(model){
+  plot_subgraph(model, model$graphs$VC_net, stretch=0.1, min_edge_frac=0.1)
+}
+```
+
+```{r}
+patchesGG = function(model){
+  model <- plot_patches(model, 4, stretch=-0.1, lwd=3)
+  with(model$q_patches, points(centers[,1], centers[,2],  pch = 21, cex=4, bg="white", col = clrs))
+  with(model$q_patches, text(centers[,1], centers[,2],  round(p.self*100), cex=1))
+  return(model)
+}
+```
+
+```{r}
+patchesVC = function(model){
+  model <- plot_patches(model, 6, stretch=-0.1, lwd=3)
+  with(model$b_patches, points(centers[,1], centers[,2],  pch = 21, cex=4, bg="white", col = clrs))
+  with(model$b_patches, text(centers[,1], centers[,2], pch=21, round(p.self*100), cex=1))
+  return(model)
+}
+```
+
+```{r, fig.height=10, fig.width=10}
+par(mar = c(1,1,3,3), mfrow=c(2,2))
+subgraphGG(mod1)
+mtext("Egg Dispersal Communities", 3, 1, cex=1.5)
+subgraphVC(mod1)
+mtext("Potential Transmission Communities", 3, 1, cex=1.5)
+mod1 <- patchesGG(mod1)
+add_hulls(mod1, mod1$graphs$VC_net, stretch=-0.02, min_edge_frac=0.1, lty=3, lwd=1)
+mtext("Egg Patch Dynamics", 3, 1, cex=1.5)
+mod1 <- patchesVC(mod1)
+add_hulls(mod1, mod1$graphs$GG_net, stretch=-0.02, min_edge_frac=0.1, lty=3, lwd=1)
+mtext("Transmission Patch Dynamics", 3, 1, cex=1.5)
+``` 
+
+```{r}
+png("network.png", width=960, height=960)
+par(mar = c(1,1,3,3), mfrow=c(2,2))
+subgraphGG(mod1)
+mtext("Egg Dispersal Communities", 3, 1, cex=1.5)
+subgraphVC(mod1)
+mtext("Potential Transmission Communities", 3, 1, cex=1.5)
+mod1 <- patchesGG(mod1)
+add_hulls(mod1, mod1$graphs$VC_net, stretch=-0.02, min_edge_frac=0.1, lty=3, lwd=1.5)
+mtext("Egg Patch Dynamics", 3, 1, cex=1.5)
+mod1 <- patchesVC(mod1)
+add_hulls(mod1, mod1$graphs$GG_net, stretch=-0.02, min_edge_frac=0.1, lty=3, lwd=1.5)
+mtext("Transmission Patch Dynamics", 3, 1, cex=1.5)
+dev.off(dev.cur())
+``` 
+
+```{r}
+figOverlap = function(model){
+  with(model, frame_bq(b,q))
+  add_hulls(model, model$graphs$GG_net, stretch=-0.02, min_edge_frac=0.1, lty=1)
+  add_hulls(model, model$graphs$VC_net, stretch=-0.02, min_edge_frac=0.1, lty=2)
+}
+```
+
+
+```{r, fig.height=5, fig.width=5}
+figOverlap(mod1)
+mtext("Overlapping Distributions", 3, 1, cex=1.5)
+```
+
+```{r}
+if(makeFig == TRUE) png("patches.png", width=480, height=480)
+with(mod1, frame_bq(b,q))
+#add_hulls(mod1, mod1$graphs$GG_net, stretch=-0.02, min_edge_frac=0.1, cut=15)
+#add_hulls(mod1, mod1$graphs$VC_net, stretch=-0.02, min_edge_frac=0.1, cut=15,)
+add_hulls(mod1, mod1$graphs$GG_net, stretch=-0.02, min_edge_frac=0.1, lty=1)
+add_hulls(mod1, mod1$graphs$VC_net, stretch=-0.02, min_edge_frac=0.1, lty=2)
+mtext("Overlapping Distributions", 3, 1, cex=1.5)
+if(makeFig == TRUE) dev.off(dev.cur())
+```
+
+## Figure 6
+
+```{r}
+devtools::load_all("../ramp.micro")
+```
+
+```{r, fig.height=4, fig.width=8}
+makeFig=TRUE
+#makeFig=FALSE
+if(makeFig == TRUE) png("patches.png", width=4, height=480)
+par(mar = c(1,1,3,3), mfrow=c(1,2))
+mod1 <- plot_patches(mod1, 4, stretch=-0.1)
+with(mod1$q_patches, points(centers[,1], centers[,2],  pch = 21, cex=4, bg="white", col = clrs))
+with(mod1$q_patches, text(centers[,1], centers[,2],  round(p.self*100), cex=1))
+mtext("Egg Dispersal", 3, 1, cex=1.5)
+mod1 <- plot_patches(mod1, 6, stretch=-0.1)
+with(mod1$b_patches, points(centers[,1], centers[,2],  pch = 21, cex=4, bg="white", col = clrs))
+with(mod1$b_patches, text(centers[,1], centers[,2], pch=21, round(p.self*100), cex=1))
+mtext("Potential Transmission", 3, 1, cex=1.5)
+
+if(makeFig == TRUE) dev.off(dev.cur())
+```
+
+```{r}
+save(mod1, file = "mod1.rda")
+```
